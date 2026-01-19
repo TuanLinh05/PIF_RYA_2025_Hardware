@@ -1,0 +1,4 @@
+M_Driver_Signal1=ENC_C2,ENC_C1,EN2,EN1,PWM2,PWM1,SButton
+M_Driver_Signal2=ENC_C2,ENC_C1,EN2,EN1,PWM2,PWM1,SButton
+M_Driver_Signal3=ENC_C2,ENC_C1,EN2,EN1,PWM2,PWM1,SButton
+M_Driver_Signal4=ENC_C2,ENC_C1,EN2,EN1,PWM2,PWM1,SButton
