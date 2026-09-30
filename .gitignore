@@ -1,0 +1,13 @@
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# ---- Altium Designer ----
+History/
+__Previews/
+Project Logs for */
+*.SchDocPreview
+*.PcbDocPreview
