@@ -1,93 +1,98 @@
-# ⚡ PIF RYA 2025 – H-Bridge Motor Driver Hardware
+# PIF RYA 2025 Motor Driver Hardware
 
-![MCU](https://img.shields.io/badge/MCU-STM32F103RCT6-03234B?logo=stmicroelectronics&logoColor=white)
-![Gate driver](https://img.shields.io/badge/Gate%20driver-IR2104-C62828)
-![CAN](https://img.shields.io/badge/CAN-TJA1050-455A64)
-![PCB](https://img.shields.io/badge/PCB-Altium%20Designer-A5915F)
+**A two-board motor-driver design: STM32/CAN control and an optocoupled MOSFET H-bridge.**
 
-<a id="english"></a>**🇬🇧 English** · [🇻🇳 Tiếng Việt](#tieng-viet)
+STM32F103RCT6 · TJA1050 · PC817 · IR2104 · Altium Designer
 
-Motor driver hardware designed for the **PIF RYA 2025** robot project (Pay It Forward). It has two boards that work together: an **STM32-based control board with CAN bus** and a **high-current MOSFET H-bridge** power board driven by **IR2104** gate drivers.
+<a id="english"></a>
 
----
+**English** · [Tiếng Việt](#tieng-viet)
 
-## 🧩 System overview
+Hardware design files for the Pay It Forward RYA 2025 robot project. The control board provides the MCU, CAN interface, power and sensing/protection circuits. A separate power board drives the motor through two half-bridge gate drivers and four N-channel MOSFETs.
 
-```text
-            CAN bus (TJA1050)
-                  │
-┌─────────────────▼─────────────────┐    control    ┌─────────────────────────────┐        ┌───────┐
-│ HBridgeMCU – control board        │ ────────────▶ │ HBridgeDriver – power board │ ─────▶ │ Motor │
-│ STM32F103RCT6 · current sensing   │   signals     │ IR2104 + N-MOSFET H-bridge  │        └───────┘
-│ protection · power                │               │ VDC 12–16 V                 │
-└───────────────────────────────────┘               └─────────────────────────────┘
-```
+![Control board and power board architecture](docs/images/project-overview.svg)
 
-## ⚙️ Key specifications
+*Block diagram based on the board folders, schematic sheet names and committed BOMs. It illustrates the design organization.*
 
-| Item | Value |
-| :-- | :-- |
-| Microcontroller | **STM32F103RCT6**: ARM Cortex-M3, 72 MHz, 256 KB Flash |
-| Communication | **CAN bus** through a **TJA1050** transceiver |
-| Motor supply (VDC) | **12–16 V**, isolated from the control side |
-| Power stage | N-MOSFET H-bridge with **IR2104** half-bridge gate drivers |
-| Protection | Resettable fuse (over-current), VDC protection circuit, isolation between control and power stages |
-| Feedback | Motor current sensing |
+## What is included
 
-## 📂 Repository structure
+| Board | Contents | Parts recorded in the BOM |
+|---|---|---|
+| `1.HBridgeMCU` | MCU, CAN, power, current sensing, protection and driver connector | STM32F103RCT6, TJA1050T and protection/power components |
+| `2.HBridgeDriver` | Isolated control inputs, gate drivers, MOSFET bridge and motor output | Two PC817 optocouplers, two IR2104SPBF drivers, four IRLR7843 MOSFETs |
 
-Each board follows the same folder layout:
+The earlier project documentation gives **12-16 V** as the motor-supply design target. Component ratings in the BOM should be read as individual part specifications; a verified board-level continuous current or thermal limit is not provided in this checkout.
+
+## Design files
 
 ```text
 PIF_RYA_2025_Hardware/
-├── 1.HBridgeMCU/              # Control board
-│   ├── 1.Project/             # Altium project (RYA_MotorMCU.PrjPcb)
-│   ├── 2.Schematic/           # TopLevel, BlockDiagram, MCU, POWER, CAN_IC,
-│   │                          # CurrentSense, Protect, VDCProtect, MotorDriverConnector
-│   ├── 3.Layout/              # PCB layout + panel
-│   ├── 4.Mechanic/            # 3D STEP model
-│   ├── 5.Gerber/              # Manufacturing files
-│   └── 6.BOM/                 # Bill of materials (.xlsx)
-└── 2.HBridgeDriver/           # Power board
-    ├── 2.Schematic/           # TopLevelDesign, MotorDriver
-    ├── 3.Layout/              # RYA_MotorDriver PCB + panel
-    ├── 4.Mechanic/ · 5.Gerber/ · 6.BOM/
-    └── 1.Project/
+├── 1.HBridgeMCU/
+│   ├── 1.Project/             # Complete Altium project and local copies
+│   ├── 2.Schematic/           # MCU, CAN, power, sensing and protection sheets
+│   ├── 3.Layout/              # PCB and panel documents
+│   ├── 4.Mechanic/            # STEP and PCB mechanical outputs
+│   ├── 5.Gerber/              # Archived fabrication outputs
+│   └── 6.BOM/                 # BOM workbook and Altium BOM document
+└── 2.HBridgeDriver/            # Same organization for the power board
 ```
 
-## 🚀 Usage
+| Resource | Control board | Power board |
+|---|---|---|
+| Project | [RYA_MotorMCU.PrjPcb](1.HBridgeMCU/1.Project/RYA_MotorMCU/RYA_MotorMCU.PrjPcb) | [RYA_MotorDriver.PrjPcb](2.HBridgeDriver/1.Project/RYA_MotorDriver/RYA_MotorDriver.PrjPcb) |
+| Schematic sheets | [2.Schematic](1.HBridgeMCU/2.Schematic) | [2.Schematic](2.HBridgeDriver/2.Schematic) |
+| PCB layout | [HBridgeMainBoard.PcbDoc](1.HBridgeMCU/3.Layout/HBridgeMainBoard.PcbDoc) | [RYA_MotorDriver.PcbDoc](2.HBridgeDriver/3.Layout/RYA_MotorDriver.PcbDoc) |
+| Mechanical model | [HBridgeMainBoard.step](1.HBridgeMCU/4.Mechanic/HBridgeMainBoard.step) | [RYA_MotorDriver.step](2.HBridgeDriver/4.Mechanic/RYA_MotorDriver.step) |
+| Bill of materials | [BOMHBridgeMCU.xlsx](1.HBridgeMCU/6.BOM/BOMHBridgeMCU.xlsx) | [BOMHBridgeDriver.xlsx](2.HBridgeDriver/6.BOM/BOMHBridgeDriver.xlsx) |
+| Fabrication archive | [5.Gerber](1.HBridgeMCU/5.Gerber) | [5.Gerber](2.HBridgeDriver/5.Gerber) |
 
-- Open the `.PrjPcb` files in **Altium Designer** to view or edit the schematics and PCBs.
-- Send the `5.Gerber` outputs to a PCB manufacturer, and use the `6.BOM` spreadsheets to order parts.
+## Review the design
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/TuanLinh05/PIF_RYA_2025_Hardware.git
+   ```
+
+2. Open the appropriate `.PrjPcb` in **Altium Designer**. Start with the complete project under `1.Project`; the numbered folders also hold exported/separated design documents.
+3. Compile the schematic project, inspect sheet connections and compare the PCB with its schematic and BOM.
+4. Review board-to-board control signals, ground/isolation boundaries, supply connections and motor output in the actual schematic before assembly.
+5. Inspect the Gerber/drill archive for the selected PCB revision before manufacturing.
+
+Both `5.Gerber` directories contain an archive named `Project Outputs for RYA_MotorMCU.zip`. The filename alone does not identify the intended board; inspect its internal artwork and revision. The checkout includes several copies of project documents, so confirm which copy you edit before regenerating outputs.
+
+## Scope and reuse
+
+This repository supplies **hardware design artifacts**. It does not contain a motor-control firmware application or a published test report establishing electrical/thermal performance. Firmware, control timing, CAN command protocol and measured current limits need their own implementation or validation.
+
+Preserve any component-library and third-party model notices when reusing the Altium/STEP artifacts.
 
 ---
 
 <a id="tieng-viet"></a>
 
-## 🇻🇳 Tiếng Việt
+## Tiếng Việt
 
-[🇬🇧 English](#english) · **🇻🇳 Tiếng Việt**
+[English](#english) · **Tiếng Việt**
 
-Phần cứng mạch điều khiển động cơ cho dự án robot **PIF RYA 2025** (Pay It Forward). Gồm hai board hoạt động phối hợp: **board điều khiển dùng STM32, giao tiếp CAN bus** và **board công suất cầu H dùng MOSFET**, lái bằng IC **IR2104**.
+Phần cứng điều khiển động cơ cho robot **PIF RYA 2025**, gồm hai board:
 
-### ⚙️ Thông số chính
+- **HBridgeMCU:** STM32F103RCT6, giao tiếp CAN qua TJA1050T, nguồn, đo dòng và các khối bảo vệ.
+- **HBridgeDriver:** hai optocoupler PC817, hai IC lái IR2104SPBF và bốn MOSFET IRLR7843 tạo cầu H.
 
-| Hạng mục | Giá trị |
-| :-- | :-- |
-| Vi điều khiển | **STM32F103RCT6**: ARM Cortex-M3, 72 MHz, 256 KB Flash |
-| Giao tiếp | **CAN bus** qua IC transceiver **TJA1050** |
-| Nguồn động cơ (VDC) | **12–16 V**, cách ly với khối điều khiển |
-| Tầng công suất | Cầu H MOSFET kênh N với IC lái nửa cầu **IR2104** |
-| Bảo vệ | Cầu chì tự phục hồi (quá dòng), mạch bảo vệ điện áp VDC, cách ly giữa khối điều khiển và khối công suất |
-| Phản hồi | Đo dòng động cơ |
+Sơ đồ đầu README minh họa tổ chức thiết kế dựa trên các sheet schematic và BOM. Tài liệu cũ đặt mục tiêu nguồn động cơ **12-16 V**; thông số dòng của linh kiện trong BOM chưa xác nhận dòng liên tục hoặc giới hạn nhiệt của cả board.
 
-Sơ đồ khối và cấu trúc thư mục: xem phần tiếng Anh ở trên. Mỗi board có đủ project Altium, schematic, layout, mô hình 3D, file Gerber và BOM.
+### Mở và sử dụng
 
-### 🚀 Sử dụng
+1. Clone repo, mở project Altium của board cần xem trong `1.Project`.
+2. Đối chiếu schematic, layout, BOM và mô hình STEP bằng các liên kết ở [bảng file thiết kế](#design-files).
+3. Kiểm tra chân nối hai board, ranh giới cách ly, nguồn và ngõ ra động cơ theo schematic thực tế.
+4. Xem nội dung Gerber/drill và xác nhận revision trước khi gửi sản xuất.
 
-- Mở các file `.PrjPcb` bằng **Altium Designer** để xem hoặc sửa schematic và PCB.
-- Gửi file trong `5.Gerber` cho nhà sản xuất PCB, dùng bảng BOM trong `6.BOM` để đặt linh kiện.
+Mỗi board có project, schematic, PCB/panel, STEP, Gerber và BOM. Có nhiều bản sao tài liệu; cần xác định đúng project đang chỉnh sửa. Hai thư mục Gerber dùng cùng tên ZIP `Project Outputs for RYA_MotorMCU.zip`, vì vậy phải kiểm tra nội dung thay vì dựa vào tên file.
+
+Repo hiện cung cấp **thiết kế phần cứng**. Firmware điều khiển, giao thức lệnh CAN và báo cáo đo điện/nhiệt cần được triển khai hoặc kiểm tra riêng. Giữ ghi nhận thư viện/model của bên thứ ba khi tái sử dụng.
 
 ---
 
-<p align="center">Made by <a href="https://github.com/TuanLinh05">Vu Tuan Linh</a> · HCMUT · Pay It Forward</p>
+Designed for Pay It Forward RYA 2025 by [Vu Tuan Linh](https://github.com/TuanLinh05) · HCMUT.
